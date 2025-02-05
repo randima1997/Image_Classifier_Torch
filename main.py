@@ -3,6 +3,7 @@ import torchvision
 from torch import nn
 from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets, transforms, models
+from multiprocessing import freeze_support
 
 
 # Hyperparameters and paths
@@ -142,6 +143,36 @@ def train(train_dataloader, val_dataloader, loss_fn, optim):
         model.eval()
         size = len(val_dataloader.dataset)
         num_batches = len(val_dataloader)
-        test_loss, correct = 0, 0
+        val_loss, correct = 0, 0
+
+        with torch.no_grad():
+            for X, y in val_dataloader:
+                X,y = X.to(device), y.to(device)
+                pred = model(X)
+                test_loss += loss_fn(pred, y).item()
+                correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+
+        val_loss /= num_batches
+        correct /= size
+        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
 
+# Main execution block
+
+if __name__ == '__main__':
+    freeze_support()
+    try:
+        for t in range(epochs):
+
+
+            print(f"Running Epoch {t+1}")
+            train(train_dataloader, val_dataloader, loss_func, optimizer)
+
+
+
+    except KeyboardInterrupt:
+        print("\nTraining interrupted. Saving the model...")
+        torch.save(model, "models/resnet_34")
+        print("Model saved!")
+
+        
