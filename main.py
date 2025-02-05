@@ -13,7 +13,7 @@ test_data_path = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/I
 
 batch_size = 64
 lr = 0.001
-epochs = 2
+epochs = 4
 
 
 # GPU availability
@@ -117,12 +117,12 @@ loss_func = nn.CrossEntropyLoss()
 
 # Defining optimizers
 
-optimizer = torch.optim.SGD(model.parameters(), lr= lr, momentum= 0.9)
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
 
 
 # Training loop
 
-def train(train_dataloader, val_dataloader, loss_fn, optim):
+def train(train_dataloader, model, loss_fn, optim):
     size = len(train_dataloader.dataset)
 
     model.train()
@@ -140,38 +140,40 @@ def train(train_dataloader, val_dataloader, loss_fn, optim):
         train_loss, current = loss.item(), batch * batch_size + len(X)
         print(f"loss: {train_loss:>7f}  [{current:>5d}/{size:>5d}]")
 
-        model.eval()
-        size = len(val_dataloader.dataset)
-        num_batches = len(val_dataloader)
-        val_loss, correct = 0, 0
+        
+def test(val_dataloader, model, loss_fn):
+    model.eval()
+    size = len(val_dataloader.dataset)
+    num_batches = len(val_dataloader)
+    val_loss, correct = 0, 0
 
-        with torch.no_grad():
-            for X, y in val_dataloader:
-                X,y = X.to(device), y.to(device)
-                pred = model(X)
-                val_loss += loss_fn(pred, y).item()
-                correct += (pred.argmax(1) == y).type(torch.float).sum().item()
+    with torch.no_grad():
+        for X, y in val_dataloader:
+            X,y = X.to(device), y.to(device)
+            pred = model(X)
+            val_loss += loss_fn(pred, y).item()
+            correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
-        val_loss /= num_batches
-        correct /= size
-        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {val_loss:>8f} \n")
+    val_loss /= num_batches
+    correct /= size
+    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {val_loss:>8f} \n")
+
 
 
 # Main execution block
-
-
 
 try:
     for t in range(epochs):
 
 
         print(f"Running Epoch {t+1}")
-        train(train_dataloader, val_dataloader, loss_func, optimizer)
+        train(train_dataloader, model, loss_func, optimizer)
+        test(val_dataloader, model, loss_func)
 
 
 
 except KeyboardInterrupt:
     print("\nTraining interrupted. Saving the model...")
-    torch.save(model, "models/resnet_34")
+    torch.save(model.state_dict(), "weights/Resnet34_weights.pth")
     print("Model saved!")
 
