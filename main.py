@@ -5,6 +5,18 @@ from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets, transforms, models
 from multiprocessing import freeze_support
 
+# GPU availability
+
+    
+device = (
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+print(f"Using {device} device")
+
 
 # Hyperparameters and paths
 
@@ -15,17 +27,6 @@ batch_size = 64
 lr = 0.001
 epochs = 2
 
-
-# GPU availability
-
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
-print(f"Using {device} device")
 
 
 # Transforms for the Train and Test datasets
@@ -149,18 +150,20 @@ def train(train_dataloader, val_dataloader, loss_fn, optim):
             for X, y in val_dataloader:
                 X,y = X.to(device), y.to(device)
                 pred = model(X)
-                test_loss += loss_fn(pred, y).item()
+                val_loss += loss_fn(pred, y).item()
                 correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         val_loss /= num_batches
         correct /= size
-        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {val_loss:>8f} \n")
 
 
 # Main execution block
 
 if __name__ == '__main__':
     freeze_support()
+
+
     try:
         for t in range(epochs):
 
