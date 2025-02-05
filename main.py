@@ -2,7 +2,7 @@ import torch
 import torchvision
 from torch import nn
 from torch.utils.data import DataLoader, Dataset, random_split
-from torchvision import datasets, transforms
+from torchvision import datasets, transforms, models
 
 
 # Hyperparameters and paths
@@ -87,3 +87,61 @@ test_dataloader = DataLoader(
     num_workers= 3,
     pin_memory= True
 )
+
+
+# Model definition
+
+class christmasClassifier(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.base_model = models.resnet34(weights= "IMAGENET1K_V1")
+
+        for params in self.base_model.parameters():
+            params.requires_grad = False
+
+        num_ftrs = self.base_model.fc.in_features
+        self.base_model.fc = nn.Linear(num_ftrs, 8)
+
+    def forward(self, x):
+        x = self.base_model(x)
+
+        return x
+
+
+model = christmasClassifier().to(device)
+
+# Loss function
+
+loss_func = nn.CrossEntropyLoss()
+
+# Defining optimizers
+
+optimizer = torch.optim.SGD(model.parameters(), lr= lr, momentum= 0.9)
+
+
+# Training loop
+
+def train(train_dataloader, val_dataloader, loss_fn, optim):
+    size = len(train_dataloader.dataset)
+
+    model.train()
+
+    for batch, (X, y) in enumerate(train_dataloader):
+        X, y = X.to(device) , y.to(device)
+        prediction = model(X)
+
+        loss = loss_fn(prediction, y)
+
+        optim.zero_grad()
+        loss.backward()
+        optim.step()
+        
+        train_loss, current = loss.item(), batch * batch_size + len(X)
+        print(f"loss: {train_loss:>7f}  [{current:>5d}/{size:>5d}]")
+
+        model.eval()
+        size = len(val_dataloader.dataset)
+        num_batches = len(val_dataloader)
+        test_loss, correct = 0, 0
+
+
