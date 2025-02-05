@@ -3,8 +3,9 @@ import torchvision
 from torch import nn
 from torch.utils.data import DataLoader, Dataset, random_split
 from torchvision import datasets, transforms, models
-from multiprocessing import freeze_support
+from main import christmasClassifier, train, test
 
+weights_path = "weights/Resnet34_weights.pth"
 
 # Hyperparameters and paths
 
@@ -13,7 +14,7 @@ test_data_path = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/I
 
 batch_size = 64
 lr = 0.001
-epochs = 2
+epochs = 4
 
 
 # GPU availability
@@ -90,26 +91,12 @@ test_dataloader = DataLoader(
 )
 
 
-# Model definition
+# Initialize model and load the weights
 
-class christmasClassifier(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.base_model = models.resnet34(weights= "IMAGENET1K_V1")
+model = christmasClassifier()
+model.load_state_dict(torch.load(weights_path, weights_only=True))
+model = model.to(device)
 
-        for params in self.base_model.parameters():
-            params.requires_grad = False
-
-        num_ftrs = self.base_model.fc.in_features
-        self.base_model.fc = nn.Linear(num_ftrs, 8)
-
-    def forward(self, x):
-        x = self.base_model(x)
-
-        return x
-
-
-model = christmasClassifier().to(device)
 
 # Loss function
 
@@ -117,48 +104,7 @@ loss_func = nn.CrossEntropyLoss()
 
 # Defining optimizers
 
-optimizer = torch.optim.SGD(model.parameters(), lr= lr, momentum= 0.9)
-
-
-# Training loop
-
-def train(train_dataloader, val_dataloader, loss_fn, optim):
-    size = len(train_dataloader.dataset)
-
-    model.train()
-
-    for batch, (X, y) in enumerate(train_dataloader):
-        X, y = X.to(device) , y.to(device)
-        prediction = model(X)
-
-        loss = loss_fn(prediction, y)
-
-        optim.zero_grad()
-        loss.backward()
-        optim.step()
-        
-        train_loss, current = loss.item(), batch * batch_size + len(X)
-        print(f"loss: {train_loss:>7f}  [{current:>5d}/{size:>5d}]")
-
-        model.eval()
-        size = len(val_dataloader.dataset)
-        num_batches = len(val_dataloader)
-        val_loss, correct = 0, 0
-
-        with torch.no_grad():
-            for X, y in val_dataloader:
-                X,y = X.to(device), y.to(device)
-                pred = model(X)
-                val_loss += loss_fn(pred, y).item()
-                correct += (pred.argmax(1) == y).type(torch.float).sum().item()
-
-        val_loss /= num_batches
-        correct /= size
-        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {val_loss:>8f} \n")
-
-
-# Main execution block
-
+optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
 
 
 try:
@@ -166,12 +112,12 @@ try:
 
 
         print(f"Running Epoch {t+1}")
-        train(train_dataloader, val_dataloader, loss_func, optimizer)
+        train(train_dataloader, model, loss_func, optimizer)
+        test(val_dataloader, model, loss_func)
 
 
 
 except KeyboardInterrupt:
     print("\nTraining interrupted. Saving the model...")
-    torch.save(model.state_dict(), 'Resnet34_weights.pth')
+    torch.save(model.state_dict(), "weights/Resnet34_weights_rtr.pth")
     print("Model saved!")
-
