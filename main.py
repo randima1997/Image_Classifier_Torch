@@ -68,7 +68,7 @@ train_dataloader = DataLoader(
     dataset= train_dataset,
     batch_size= batch_size,
     shuffle= True,
-    num_workers= 3,
+    num_workers= 0,
     pin_memory= True
 )
 
@@ -76,7 +76,7 @@ val_dataloader = DataLoader(
     dataset= val_dataset,
     batch_size= batch_size,
     shuffle= False,                 
-    num_workers= 3,
+    num_workers= 0,
     pin_memory= True
 )
 
@@ -85,7 +85,7 @@ test_dataloader = DataLoader(
     dataset= test_dataset,
     batch_size= batch_size,
     shuffle= False,                 # Not shuffling the Test set
-    num_workers= 3,
+    num_workers= 0,
     pin_memory= True
 )
 
@@ -149,30 +149,29 @@ def train(train_dataloader, val_dataloader, loss_fn, optim):
             for X, y in val_dataloader:
                 X,y = X.to(device), y.to(device)
                 pred = model(X)
-                test_loss += loss_fn(pred, y).item()
+                val_loss += loss_fn(pred, y).item()
                 correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         val_loss /= num_batches
         correct /= size
-        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
+        print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {val_loss:>8f} \n")
 
 
 # Main execution block
 
-if __name__ == '__main__':
-    freeze_support()
-    try:
-        for t in range(epochs):
 
 
-            print(f"Running Epoch {t+1}")
-            train(train_dataloader, val_dataloader, loss_func, optimizer)
+try:
+    for t in range(epochs):
+
+
+        print(f"Running Epoch {t+1}")
+        train(train_dataloader, val_dataloader, loss_func, optimizer)
 
 
 
-    except KeyboardInterrupt:
-        print("\nTraining interrupted. Saving the model...")
-        torch.save(model, "models/resnet_34")
-        print("Model saved!")
+except KeyboardInterrupt:
+    print("\nTraining interrupted. Saving the model...")
+    torch.save(model, "models/resnet_34")
+    print("Model saved!")
 
-        
