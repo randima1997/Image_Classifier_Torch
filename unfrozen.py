@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
 # Defining optimizers
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay= 0.0001)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma= 0.1)
 
 
