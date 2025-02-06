@@ -12,7 +12,7 @@ import time
 class christmasClassifier(nn.Module):
     def __init__(self):
         super().__init__()
-        self.base_model = models.resnet34(weights= "IMAGENET1K_V1")
+        self.base_model = models.resnet50(weights= "IMAGENET1K_V1")
 
         for params in self.base_model.parameters():
             params.requires_grad = False
@@ -91,8 +91,8 @@ if __name__ == '__main__':
     test_data_path = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/val"
 
     batch_size = 64
-    lr = 0.001
-    epochs = 2
+    lr = 0.01
+    epochs = 6
     num_workers = 5
 
 
@@ -168,7 +168,7 @@ if __name__ == '__main__':
 # Defining optimizers
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
-
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size= 1, gamma= 0.1)
 
 
 # Main execution block
@@ -178,15 +178,17 @@ if __name__ == '__main__':
         for t in range(epochs):
             
             start_time = time.time()
+            print(f"Current learning rate: {optimizer.param_groups[0]['lr']}")
             print(f"Running Epoch {t+1}")
             train(train_dataloader, model, device, loss_func, optimizer)
             test(val_dataloader, model, device, loss_func)
+            scheduler.step()
             print("Elapsed time: ", (time.time() - start_time))
 
 
     except KeyboardInterrupt:
         print("\nTraining interrupted. Saving the model...")
-        torch.save(model.state_dict(), 'weights/Resnet34_weights.pth')
+        torch.save(model.state_dict(), 'weights/Resnet50_weights.pth')
         print("Model saved!")
 
         

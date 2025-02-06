@@ -14,7 +14,7 @@ import time
 if __name__ == '__main__':
     freeze_support()
 
-    weights_path = "weights/Resnet34_weights_rtr.pth"
+    weights_path = "weights/Resnet50_weights.pth"
 
 # Hyperparameters and paths
 
@@ -139,5 +139,5 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         print("\nTraining interrupted. Saving the model...")
-        torch.save(model.state_dict(), "weights/Resnet34_weights_unfrozen.pth")
+        torch.save(model.state_dict(), "weights/Resnet50_weights_unfrozen.pth")
         print("Model saved!")
