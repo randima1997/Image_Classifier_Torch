@@ -7,7 +7,7 @@ from main import christmasClassifier, test
 
 
 test_data_path = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/val"
-weights_path = "weights/Resnet34_weights_unfrozen.pth"
+weights_path = "weights/Resnet50_weights_test1.pth"
 
 device = (
         "cuda"
