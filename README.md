@@ -31,7 +31,7 @@ Loss function: CrossEntropyLoss
 * Reached 92%
 * Tested with batch_size 32 and step lr scheduling
 * Reached 93.8%
-* Tested batch_size 16 and 8
+* Tested batch_size 16 and 8. Validation accuracies improved substationally to 98% but test accuracy remained at 93.1%
 
 
 
