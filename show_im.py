@@ -10,8 +10,8 @@ from torchvision.io import decode_image, read_image, write_png
 
 
 
-path_train =  "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/train"
-path_test = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/val"
+path_train =  "/media/randima/Data/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/train"
+path_test = "/media/randima/Data/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/val"
 
 transform = transforms.Compose([
     #transforms.RandomHorizontalFlip(),

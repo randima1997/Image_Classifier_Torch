@@ -18,8 +18,8 @@ if __name__ == '__main__':
 
 # Hyperparameters and paths
 
-    train_data_path = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/train"
-    test_data_path = "D:/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/val"
+    train_data_path = "/media/randima/Data/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/train"
+    test_data_path = "/media/randima/Data/Engineering/Uni Siegen/Semester 3/Deep Learning/Project 1/Image_Classifier_TF/data/val"
 
     batch_size = 64
     lr = 0.0001
